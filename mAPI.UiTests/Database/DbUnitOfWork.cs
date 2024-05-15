@@ -1,12 +1,7 @@
 ﻿namespace mAPI.UiTests.Database
 {
-    public class DbUnitOfWork
+    public class DbUnitOfWork(ApplicationDbContext accountDbContext)
     {
-        public ApplicationDbContext DonationDB { get; }
-
-        public DbUnitOfWork(ApplicationDbContext accountDbContext)
-        {
-            DonationDB = accountDbContext;
-        }
+        public ApplicationDbContext DonationDB { get; } = accountDbContext;
     }
 }

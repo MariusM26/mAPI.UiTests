@@ -1,5 +1,4 @@
-﻿
-namespace mAPI.UiTests.UiFramework
+﻿namespace mAPI.UiTests.UiFramework.Driver
 {
     public static class WaitPeriods
     {

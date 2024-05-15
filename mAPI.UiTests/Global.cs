@@ -3,6 +3,9 @@ using NUnit.Framework;
 
 namespace mAPI.UiTests
 {
+    /// <summary>
+    /// Global class to initialize IoC as a one time setup.
+    /// </summary>
     [SetUpFixture]
     public class Global
     {

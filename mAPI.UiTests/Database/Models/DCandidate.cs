@@ -1,8 +1,9 @@
 ﻿#nullable disable
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using mAPI.UiTests.Database.Interfaces;
 
-namespace mAPI.UiTests.Database
+namespace mAPI.UiTests.Database.Models
 {
     public class DCandidate : IDbEntity
     {

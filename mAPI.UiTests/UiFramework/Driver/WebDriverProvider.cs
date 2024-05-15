@@ -1,7 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-namespace mAPI.UiTests.UiFramework;
+namespace mAPI.UiTests.UiFramework.Driver;
 
 public class WebDriverProvider
 {

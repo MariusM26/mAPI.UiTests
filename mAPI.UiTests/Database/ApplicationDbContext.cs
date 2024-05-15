@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using mAPI.UiTests.Database.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace mAPI.UiTests.Database
 {

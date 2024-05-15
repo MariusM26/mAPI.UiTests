@@ -3,7 +3,7 @@ using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
-namespace mAPI.UiTests.UiFramework
+namespace mAPI.UiTests.UiFramework.Driver
 {
     public static class Browser
     {

@@ -1,4 +1,4 @@
-﻿namespace mAPI.UiTests.Database
+﻿namespace mAPI.UiTests.Database.Interfaces
 {
     public interface IDbEntity
     {
