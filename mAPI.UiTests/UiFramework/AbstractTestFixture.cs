@@ -14,11 +14,14 @@ namespace mAPI.UiTests.UiFramework
         }
 
 
-        protected T Resolve<T>() => _serviceScope.ServiceProvider.GetRequiredService<T>();
+        protected object Resolve(Type type) => _serviceScope.ServiceProvider.GetRequiredService(type);
+
+        protected T Resolve<T>() where T : notnull => _serviceScope.ServiceProvider.GetRequiredService<T>();
 
         public void Dispose()
         {
             _serviceScope.Dispose();
+            GC.SuppressFinalize(this);
             OnDispose();
         }
 

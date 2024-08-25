@@ -7,7 +7,7 @@ namespace mAPI.UiTests
     /// Global class to initialize IoC as a one time setup.
     /// </summary>
     [SetUpFixture]
-    public class Global
+    public class StartingPoint
     {
         [OneTimeSetUp]
         public Task GlobalSetup()

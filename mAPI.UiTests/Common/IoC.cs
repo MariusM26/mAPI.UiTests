@@ -1,7 +1,11 @@
-﻿using mAPI.UiTests.Database;
+﻿using mAPI.UiTests.Common.Models.AppSettings;
+using mAPI.UiTests.Database;
+using mAPI.UiTests.Logger;
+using mAPI.UiTests.UiFramework.Driver;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace mAPI.UiTests.Common
 {
@@ -12,17 +16,19 @@ namespace mAPI.UiTests.Common
     public class IoC
     {
         private static volatile bool _isInitialized;
-        private static readonly ServiceCollection Services;
-        private static readonly IConfigurationRoot Configuration;
-        private static readonly object ServiceProviderLock = new();
+
         private static ServiceProvider? _serviceProvider;
 
+        private static readonly object ServiceProviderLock = new();
+        private static readonly ServiceCollection Services;
 
         static IoC()
         {
             Services = new ServiceCollection();
-            Configuration = CreateConfiguration();
+
+            SetAppSettings();
         }
+
 
         #region Setup
         public static IServiceScope CreateScope()
@@ -42,15 +48,6 @@ namespace mAPI.UiTests.Common
 
             return _serviceProvider.CreateScope();
         }
-
-        private static IConfigurationRoot CreateConfiguration()
-        {
-            var builder = new ConfigurationBuilder();
-
-            builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-            return builder.Build();
-        }
         #endregion
 
 
@@ -59,22 +56,35 @@ namespace mAPI.UiTests.Common
         {
             if (!_isInitialized)
             {
-                RegisterCredentials();
                 InitInternal();
 
                 _isInitialized = true;
             }
         }
 
-        private static void RegisterCredentials()
-        {
-            Services.Configure<ApplicationUserCredentials>(Configuration.GetSection("ApplicationUserCredentials"));
-        }
-
         private static void InitInternal()
         {
-            Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetSection("DatabaseSettings:DevConnection").Value));
+            Services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddAppLogging());
+
+            Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(AppSettings.Instance.DatabaseSettings.MAPIDB));
+
             Services.AddTransient<DbUnitOfWork>();
+
+            Services.AddSingleton<WebDriverProvider>();
+            Services.AddScoped<Browser>();
+        }
+
+        private static void SetAppSettings()
+        {
+            var abc = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            var builder = new ConfigurationBuilder();
+
+            var appSettings = builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                                     .Build()
+                                     .Get<AppSettings>();
+
+            AppSettings.Configure(appSettings);
         }
         #endregion
     }

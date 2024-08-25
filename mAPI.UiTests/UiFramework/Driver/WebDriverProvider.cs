@@ -1,41 +1,52 @@
-﻿using OpenQA.Selenium;
+﻿using mAPI.UiTests.Common.Models.AppSettings;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
 namespace mAPI.UiTests.UiFramework.Driver;
 
 public class WebDriverProvider
 {
-    #region Public Methods
-    public static IWebDriver Get => SetDriverWait(ChromeDriver);
-    #endregion
-
-
-    #region Private Methods
-    private static IWebDriver ChromeDriver
+    public WebDriverProvider()
     {
-        get
+    }
+
+    public static IWebDriver Get()
+    {
+        var webDriver = GetChromeDriver();
+
+        webDriver.Manage().Timeouts().PageLoad = WaitPeriods.PageLoad;
+        webDriver.Manage().Timeouts().ImplicitWait = WaitPeriods.ImplicitWait;
+        webDriver.Manage().Timeouts().AsynchronousJavaScript = WaitPeriods.ExplicitWait;
+
+        return webDriver;
+    }
+
+    private static ChromeDriver GetChromeDriver()
+    {
+        var chromeOptions = new ChromeOptions
         {
-            var chromeOptions = new ChromeOptions
-            {
-                AcceptInsecureCertificates = true,
-            };
+            AcceptInsecureCertificates = true
+        };
 
+        chromeOptions.AddArguments("--no-sandbox");
+        chromeOptions.AddUserProfilePreference("download.default_directory", Path.GetFullPath(AppSettings.Instance.BrowserSettings.DownloadsPath));
+
+
+        if (AppSettings.Instance.BrowserSettings.Incognito)
+        {
             chromeOptions.AddArguments("--incognito");
-            chromeOptions.AddArgument("--start-maximized");
-            chromeOptions.AddArguments("--no-sandbox");
-            chromeOptions.AddArguments("--disable-dev-shm-usage");
-
-            return new ChromeDriver(chromeOptions);
         }
-    }
 
-    private static IWebDriver SetDriverWait(IWebDriver driver)
-    {
-        driver.Manage().Timeouts().PageLoad = WaitPeriods.PageLoad;
-        driver.Manage().Timeouts().ImplicitWait = WaitPeriods.ImplicitWait;
-        driver.Manage().Timeouts().AsynchronousJavaScript = WaitPeriods.ExplicitWait;
+        if (AppSettings.Instance.BrowserSettings.Headless)
+        {
+            chromeOptions.AddArgument("--headless");
+            chromeOptions.AddArgument("--window-size=1920,1080");
+        }
+        else
+        {
+            chromeOptions.AddArgument("--start-maximized");
+        }
 
-        return driver;
+        return new ChromeDriver(chromeOptions);
     }
-    #endregion
 }

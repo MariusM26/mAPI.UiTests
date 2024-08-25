@@ -1,28 +1,47 @@
 ﻿#nullable disable
-using NUnit.Framework;
+
+using mAPI.UiTests.Common.Models.AppSettings;
+using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 
 namespace mAPI.UiTests.UiFramework.Driver
 {
-    public static class Browser
+    public class Browser : AbstractWebFinder, IDisposable
     {
-        private static IWebDriver _webDriver;
+        private readonly IWebDriver _webDriver;
+        private readonly ILogger<Browser> _logger;
 
-        public static IWebDriver GetDriver() => _webDriver;
+        public Browser(ILogger<Browser> logger) : this(WebDriverProvider.Get())
+        {
+            _logger = logger;
+        }
 
-        public static string CurrentUrlEncoded { get => _webDriver.Url; set => _webDriver.Url = value; }
+        private Browser(IWebDriver driver) : base(driver)
+        {
+            _webDriver = driver;
+        }
+
+
+        public string CurrentUrlEncoded => _webDriver.Url;
 
 
         #region Navigation
-        public static void GoTo(string url)
+        public void Init()
         {
+            GoTo(AppSettings.Instance.BrowserSettings.AppBaseUrl);
+        }
+
+        public void GoTo(string url)
+        {
+            _logger.LogTrace("Go to {url}", url);
+
             Wait(500);
             _webDriver.Navigate().GoToUrl(url);
             Wait(500);
         }
 
-        public static void Refresh()
+        public void Refresh()
         {
             _webDriver.Navigate().Refresh();
         }
@@ -38,12 +57,7 @@ namespace mAPI.UiTests.UiFramework.Driver
 
 
         #region Setup
-        public static void Start()
-        {
-            _webDriver = WebDriverProvider.Get;
-        }
-
-        public static void Stop()
+        public void Stop()
         {
             if (_webDriver is null)
             {
@@ -54,37 +68,11 @@ namespace mAPI.UiTests.UiFramework.Driver
             _webDriver.Quit();
             _webDriver.Dispose();
         }
-
-        public static void StartNewWindow()
-        {
-            try
-            {
-                _webDriver.SwitchTo().NewWindow(WindowType.Window);
-                Wait(500);
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail(ex.Message);
-            }
-        }
-
-        public static void CloseExtraWindow(string originalWindowHandle)
-        {
-            _webDriver.Close();
-
-            if (!_webDriver.WindowHandles.Contains(originalWindowHandle))
-            {
-                Assert.Fail("The original window handle could not be identified.");
-            }
-
-            _webDriver.SwitchTo().Window(originalWindowHandle);
-            Wait(500);
-        }
         #endregion
 
 
         #region Elements
-        public static void SendKeyboardKeys(string keys)
+        public void SendKeyboardKeys(string keys)
         {
             var builder = new Actions(_webDriver);
             var sendKey = builder.SendKeys(keys).Build();
@@ -92,13 +80,13 @@ namespace mAPI.UiTests.UiFramework.Driver
             sendKey.Perform();
         }
 
-        public static void Hover(IWebElement element)
+        public void Hover(IWebElement element)
         {
             var action = new Actions(_webDriver);
             action.MoveToElement(element).Perform();
         }
 
-        public static void PasteClipboardText()
+        public void PasteClipboardText()
         {
             var builder = new Actions(_webDriver);
 
@@ -107,6 +95,19 @@ namespace mAPI.UiTests.UiFramework.Driver
                    .KeyUp(Keys.Control)
                    .Build()
                    .Perform();
+        }
+
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            _webDriver.Quit();
+            _webDriver.Dispose();
+        }
+
+        public override string GetCurrentUrl()
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }
