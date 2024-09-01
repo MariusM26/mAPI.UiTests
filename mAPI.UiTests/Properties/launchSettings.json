@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "mAPI.UiTests": {
-      "commandName": "Project",
-      "nativeDebugging": true
-    }
-  }
-}

@@ -21,12 +21,14 @@ namespace mAPI.UiTests.Common
 
         private static readonly object ServiceProviderLock = new();
         private static readonly ServiceCollection Services;
+        private static readonly IConfigurationRoot Configuration;
 
         static IoC()
         {
             Services = new ServiceCollection();
 
-            SetAppSettings();
+            Configuration = CreateConfiguration();
+            //SetAppSettings();
         }
 
 
@@ -76,8 +78,6 @@ namespace mAPI.UiTests.Common
 
         private static void SetAppSettings()
         {
-            var abc = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
             var builder = new ConfigurationBuilder();
 
             var appSettings = builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -86,6 +86,22 @@ namespace mAPI.UiTests.Common
 
             AppSettings.Configure(appSettings);
         }
+
+        private static IConfigurationRoot CreateConfiguration()
+        {
+            var configurationBuilder = new ConfigurationBuilder();
+
+            configurationBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+#if DEVELOPMENT
+            configurationBuilder.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true);
+#elif EXECUTION
+            configurationBuilder.AddJsonFile("appsettings.Execution.json", optional: false, reloadOnChange: true);
+#endif
+
+            return configurationBuilder.Build();
+        }
+
         #endregion
     }
 }
